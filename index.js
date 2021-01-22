@@ -23,6 +23,16 @@ function Speech(locale = defaultLocale) {
     this._helper = new Helper();
 }
 
+
+/**
+ * This clears all speech items
+ */
+Speech.prototype.removeAllItems = function () {
+    this._elements.length = 0;
+    return this;
+};
+
+
 /**
  * This appends raw text into the <speak/> tag.
  * @param saying The raw text to insert into the speak tag.
