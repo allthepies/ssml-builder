@@ -189,10 +189,15 @@ Speech.prototype.toObject = function () {
  * @returns {string} An XML string.
  */
 Speech.prototype.ssml = function (excludeSpeakTag) {
+    let ret = '';
     if (excludeSpeakTag) {
-        return this._elements.join(" ");
+        ret = this._elements.join(" ");
+    } else {
+        ret = "<speak>" + this._elements.join(" ") + "</speak>";
     }
-    return "<speak>" + this._elements.join(" ") + "</speak>";
+    this.removeAllItems();
+    return ret;
+
 };
 
 /**
