@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-var Helper = require('./helper');
+var Helper = require("./helper");
 const defaultLocale = "en-GB";
 
 /**
@@ -18,20 +18,18 @@ const defaultLocale = "en-GB";
  * @constructor
  */
 function Speech(locale = defaultLocale) {
-    this._elements = [];
-    this._locale = locale;
-    this._helper = new Helper();
+  this._elements = [];
+  this._locale = locale;
+  this._helper = new Helper();
 }
-
 
 /**
  * This clears all speech items
  */
 Speech.prototype.removeAllItems = function () {
-    this._elements.length = 0;
-    return this;
+  this._elements.length = 0;
+  return this;
 };
-
 
 /**
  * This appends raw text into the <speak/> tag.
@@ -39,33 +37,134 @@ Speech.prototype.removeAllItems = function () {
  * @returns {Speech}
  */
 Speech.prototype.say = function (saying, voiceAttrs = null) {
+  const validNames = [
+    "Ivy",
+    "Joanna",
+    "Joey",
+    "Justin",
+    "Kendra",
+    "Kimberly",
+    "Matthew",
+    "Salli",
+    "Nicole",
+    "Russell",
+    "Amy",
+    "Brian",
+    "Emma",
+    "Aditi",
+    "Raveena",
+    "Chantal",
+    "Celine",
+    "Lea",
+    "Mathieu",
+    "Hans",
+    "Marlene",
+    "Vicki",
+    "Aditi",
+    "Carla",
+    "Giorgio",
+    "Bianca",
+    "Mizuki",
+    "Takumi",
+    "Vitoria",
+    "Camila",
+    "Ricardo",
+    "Penelope",
+    "Lupe",
+    "Miguel",
+    "Conchita",
+    "Enrique",
+    "Lucia",
+    "Mia",
+  ];
 
-    const validNames = ["Ivy", "Joanna", "Joey", "Justin", "Kendra", "Kimberly", "Matthew", "Salli",
-        "Nicole", "Russell", "Amy", "Brian", "Emma", "Aditi", "Raveena", "Chantal", "Celine", "Lea",
-        "Mathieu", "Hans", "Marlene", "Vicki", "Aditi", "Carla", "Giorgio", "Bianca", "Mizuki", "Takumi",
-        "Vitoria", "Camila", "Ricardo", "Penelope", "Lupe", "Miguel", "Conchita", "Enrique", "Lucia", "Mia"
-    ];
+  const validLangs = [
+    "de-DE",
+    "en-AU",
+    "en-CA",
+    "en-GB",
+    "en-IN",
+    "en-US",
+    "es-ES",
+    "es-MX",
+    "es-US",
+    "fr-CA",
+    "fr-FR",
+    "hi-IN",
+    "it-IT",
+    "ja-JP",
+    "pt-BR",
+  ];
 
-    const validLangs = [
-        "de-DE", "en-AU", "en-CA", "en-GB", "en-IN", "en-US", "es-ES", "es-MX", "es-US", "fr-CA", "fr-FR", "hi-IN", "it-IT", "ja-JP", "pt-BR"
-    ];
-
-    this._present(saying, "The saying provided to Speech#saying(..) was null or undefined.");
-    if (voiceAttrs) {
-        let str = this._escape(saying);
-        if (voiceAttrs.lang) {
-            isInListCS(voiceAttrs.lang, validLangs, `Lang ${voiceAttrs.lang} is not valid`);
-            str = `<lang xml:lang="${voiceAttrs.lang}">${str}</lang>`;
-        }
-        if (voiceAttrs.name) {
-            isInListCS(voiceAttrs.name, validNames, `Voice name ${voiceAttrs.name} is not valid`);
-            str = `<voice name="${voiceAttrs.name}">${str}</voice>`
-        }
-        this._elements.push(str);
-    } else {
-        this._elements.push(this._escape(saying));
+  this._present(
+    saying,
+    "The saying provided to Speech#saying(..) was null or undefined."
+  );
+  if (voiceAttrs) {
+    let str = this._escape(saying);
+    if (voiceAttrs.lang) {
+      isInListCS(
+        voiceAttrs.lang,
+        validLangs,
+        `Lang ${voiceAttrs.lang} is not valid`
+      );
+      str = `<lang xml:lang="${voiceAttrs.lang}">${str}</lang>`;
     }
-    return this;
+    if (voiceAttrs.name) {
+      isInListCS(
+        voiceAttrs.name,
+        validNames,
+        `Voice name ${voiceAttrs.name} is not valid`
+      );
+      str = `<voice name="${voiceAttrs.name}">${str}</voice>`;
+    }
+    this._elements.push(str);
+  } else {
+    this._elements.push(this._escape(saying));
+  }
+  return this;
+};
+
+/**
+ * This appends raw text into the <speak/> tag.
+ * @param saying The raw text to insert into the speak tag.
+ * @returns {Speech}
+ */
+Speech.prototype.emotion = function (saying, voiceAttrs = null) {
+  const validNames = ["excited", "disappointed"];
+
+  const validIntensity = ["low", "medium", "high"];
+
+  this._present(
+    saying,
+    "The saying provided to Speech#saying(..) was null or undefined."
+  );
+  if (voiceAttrs) {
+    let str = this._escape(saying);
+    if (voiceAttrs.intensity) {
+      isInListCS(
+        voiceAttrs.intensity,
+        validIntensity,
+        `Intensity ${voiceAttrs.intensity} is not valid`
+      );
+    }
+    if (voiceAttrs.name) {
+      isInListCS(
+        voiceAttrs.name,
+        validNames,
+        `Emotion name ${voiceAttrs.name} is not valid`
+      );
+    }
+
+    if (voiceAttrs.intensity && voiceAttrs.name) {
+      str = `<amazon:emotion name="${voiceAttrs.name}" intensity="${voiceAttrs.intensity}">${str}</amazon:emotion>`;
+    }
+
+    this._elements.push(str);
+  } else {
+    this._elements.push(this._escape(saying));
+  }
+  return this;
 };
 
 /**
@@ -75,9 +174,12 @@ Speech.prototype.say = function (saying, voiceAttrs = null) {
  * @returns {Speech}
  */
 Speech.prototype.paragraph = function (paragraph) {
-    this._present(paragraph, "The paragraph provided to Speech#paragraph(..) was null or undefined.");
-    this._elements.push("<p>" + this._escape(paragraph) + "</p>");
-    return this;
+  this._present(
+    paragraph,
+    "The paragraph provided to Speech#paragraph(..) was null or undefined."
+  );
+  this._elements.push("<p>" + this._escape(paragraph) + "</p>");
+  return this;
 };
 
 /**
@@ -87,9 +189,12 @@ Speech.prototype.paragraph = function (paragraph) {
  * @returns {Speech}
  */
 Speech.prototype.sentence = function (saying) {
-    this._present(saying, "The sentence provided to Speech#sentence(..) was null or undefined.");
-    this._elements.push("<s>" + this._escape(saying) + "</s>");
-    return this;
+  this._present(
+    saying,
+    "The sentence provided to Speech#sentence(..) was null or undefined."
+  );
+  this._elements.push("<s>" + this._escape(saying) + "</s>");
+  return this;
 };
 
 /**
@@ -99,10 +204,13 @@ Speech.prototype.sentence = function (saying) {
  * @returns {Speech}
  */
 Speech.prototype.pause = function (duration) {
-    this._present(duration, "The duration provided to Speech#pause(..) was null or undefined.");
-    this._validateDuration(duration);
-    this._elements.push("<break time='" + duration + "'/>");
-    return this;
+  this._present(
+    duration,
+    "The duration provided to Speech#pause(..) was null or undefined."
+  );
+  this._validateDuration(duration);
+  this._elements.push("<break time='" + duration + "'/>");
+  return this;
 };
 
 /**
@@ -112,13 +220,21 @@ Speech.prototype.pause = function (duration) {
  * @returns {Speech}
  */
 Speech.prototype.pauseByStrength = function (strength) {
-    this._present(strength, "The strength provided to Speech#pauseByStrength(..) was null or undefined");
-    strength = strength.toLowerCase().trim();
-    var strengths = ['none', 'x-weak', 'weak', 'medium', 'strong', 'x-strong'];
-    isInList(strength, strengths, "The strength provided to Speech#pauseByStrength(..) was not valid. Received strength: " + strength);
+  this._present(
+    strength,
+    "The strength provided to Speech#pauseByStrength(..) was null or undefined"
+  );
+  strength = strength.toLowerCase().trim();
+  var strengths = ["none", "x-weak", "weak", "medium", "strong", "x-strong"];
+  isInList(
+    strength,
+    strengths,
+    "The strength provided to Speech#pauseByStrength(..) was not valid. Received strength: " +
+      strength
+  );
 
-    this._elements.push("<break strength='" + strength + "'/>");
-    return this;
+  this._elements.push("<break strength='" + strength + "'/>");
+  return this;
 };
 
 /**
@@ -131,18 +247,22 @@ Speech.prototype.pauseByStrength = function (strength) {
  * @returns {Speech}
  */
 Speech.prototype.audio = function (url, callback) {
-    this._present(url, "The url provided to Speech#audio(..) was null or undefined.");
-    if (callback) {
-        this._isFunction(callback, "callback");
-        var audioBuilder = new Speech();
-        callback(audioBuilder);
-        this._elements.push("<audio src='" + url + "'>" + audioBuilder.ssml(true) + "</audio>");
-    } else {
-        this._elements.push("<audio src='" + url + "'/>");
-    }
-    return this;
+  this._present(
+    url,
+    "The url provided to Speech#audio(..) was null or undefined."
+  );
+  if (callback) {
+    this._isFunction(callback, "callback");
+    var audioBuilder = new Speech();
+    callback(audioBuilder);
+    this._elements.push(
+      "<audio src='" + url + "'>" + audioBuilder.ssml(true) + "</audio>"
+    );
+  } else {
+    this._elements.push("<audio src='" + url + "'/>");
+  }
+  return this;
 };
-
 
 /**
  * Creates and inserts a say-as tag.
@@ -151,9 +271,14 @@ Speech.prototype.audio = function (url, callback) {
  * @returns {Speech}
  */
 Speech.prototype.spell = function (word) {
-    this._present(word, "The word provided to Speech#spell(..) was null or undefined.");
-    this._elements.push("<say-as interpret-as='spell-out'>" + this._escape(word) + "</say-as>");
-    return this;
+  this._present(
+    word,
+    "The word provided to Speech#spell(..) was null or undefined."
+  );
+  this._elements.push(
+    "<say-as interpret-as='spell-out'>" + this._escape(word) + "</say-as>"
+  );
+  return this;
 };
 
 /**
@@ -163,12 +288,19 @@ Speech.prototype.spell = function (word) {
  * @returns {Speech}
  */
 Speech.prototype.spellSlowly = function (word, delay) {
-    this._present(word, "The word provided to Speech#spellSlowly(..) was null or undefined.");
-    for (var i = 0; i < word.length; i++) {
-        this._elements.push("<say-as interpret-as='spell-out'>" + this._escape(word.charAt(i)) + "</say-as>");
-        this.pause(delay);
-    }
-    return this;
+  this._present(
+    word,
+    "The word provided to Speech#spellSlowly(..) was null or undefined."
+  );
+  for (var i = 0; i < word.length; i++) {
+    this._elements.push(
+      "<say-as interpret-as='spell-out'>" +
+        this._escape(word.charAt(i)) +
+        "</say-as>"
+    );
+    this.pause(delay);
+  }
+  return this;
 };
 
 /**
@@ -176,10 +308,10 @@ Speech.prototype.spellSlowly = function (word, delay) {
  * @returns {{type: string, speech}}
  */
 Speech.prototype.toObject = function () {
-    return {
-        type: 'SSML',
-        speech: this.ssml()
-    }
+  return {
+    type: "SSML",
+    speech: this.ssml(),
+  };
 };
 
 /**
@@ -189,15 +321,14 @@ Speech.prototype.toObject = function () {
  * @returns {string} An XML string.
  */
 Speech.prototype.ssml = function (excludeSpeakTag) {
-    let ret = '';
-    if (excludeSpeakTag) {
-        ret = this._elements.join(" ");
-    } else {
-        ret = "<speak>" + this._elements.join(" ") + "</speak>";
-    }
-    this.removeAllItems();
-    return ret;
-
+  let ret = "";
+  if (excludeSpeakTag) {
+    ret = this._elements.join(" ");
+  } else {
+    ret = "<speak>" + this._elements.join(" ") + "</speak>";
+  }
+  this.removeAllItems();
+  return ret;
 };
 
 /**
@@ -207,9 +338,9 @@ Speech.prototype.ssml = function (excludeSpeakTag) {
  * @private
  */
 Speech.prototype._present = function (value, msg) {
-    if (value === null || value === undefined) {
-        throw msg;
-    }
+  if (value === null || value === undefined) {
+    throw msg;
+  }
 };
 
 /**
@@ -223,19 +354,25 @@ Speech.prototype._present = function (value, msg) {
  * @private
  */
 Speech.prototype._validateDuration = function (duration) {
-    var re = /^(\d*\.?\d+)(s|ms)$/;
-    if (duration.match(re)) {
-        var parts = re.exec(duration);
-        var pauseDuration = parts[1];
-        var pauseType = parts[2];
-        if (pauseType.toLowerCase() === 's' && pauseDuration > 10) {
-            throw "The pause duration exceeds the allowed 10 second duration. Duration provided: " + duration;
-        } else if (pauseDuration > 10000) {
-            throw "The pause duration exceeds the allowed 10,000 milliseconds duration. Duration provided: " + duration;
-        }
-    } else {
-        throw "The duration must be a number followed by either 's' for second or 'ms' for milliseconds. e.g., 10s or 100ms. Max duration is 10 seconds (10000 milliseconds)."
+  var re = /^(\d*\.?\d+)(s|ms)$/;
+  if (duration.match(re)) {
+    var parts = re.exec(duration);
+    var pauseDuration = parts[1];
+    var pauseType = parts[2];
+    if (pauseType.toLowerCase() === "s" && pauseDuration > 10) {
+      throw (
+        "The pause duration exceeds the allowed 10 second duration. Duration provided: " +
+        duration
+      );
+    } else if (pauseDuration > 10000) {
+      throw (
+        "The pause duration exceeds the allowed 10,000 milliseconds duration. Duration provided: " +
+        duration
+      );
     }
+  } else {
+    throw "The duration must be a number followed by either 's' for second or 'ms' for milliseconds. e.g., 10s or 100ms. Max duration is 10 seconds (10000 milliseconds).";
+  }
 };
 
 /**
@@ -248,21 +385,61 @@ Speech.prototype._validateDuration = function (duration) {
  * @returns {Speech}
  */
 Speech.prototype.sayAs = function (options) {
-    this._present(options, "The object provided to Speech#sayAs(..) was invalid.");
-    this._present(options.word, "The word provided to Speech#sayAs(..) was null or undefined.");
-    if (options.interpret) {
-        var listOfInterpret = ['characters', 'spell-out', 'cardinal', 'number', 'ordinal', 'digits', 'fraction', 'unit', 'date', 'time', 'telephone', 'address', 'interjection', 'expletive'];
-        isInList(options.interpret, listOfInterpret, "The interpret is invalid. Received this: " + options.interpret);
-        if (options.format) {
-            this._elements.push("<say-as interpret-as=\'" + options.interpret + "\'" + " format=\'" + options.format + "'>" + options.word + "</say-as>");
-            return this;
-        }
-        this._elements.push("<say-as interpret-as=\'" + options.interpret + "'>" + options.word + "</say-as>");
-        return this;
-    } else {
-        this._elements.push(options.word);
-        return this;
+  this._present(
+    options,
+    "The object provided to Speech#sayAs(..) was invalid."
+  );
+  this._present(
+    options.word,
+    "The word provided to Speech#sayAs(..) was null or undefined."
+  );
+  if (options.interpret) {
+    var listOfInterpret = [
+      "characters",
+      "spell-out",
+      "cardinal",
+      "number",
+      "ordinal",
+      "digits",
+      "fraction",
+      "unit",
+      "date",
+      "time",
+      "telephone",
+      "address",
+      "interjection",
+      "expletive",
+    ];
+    isInList(
+      options.interpret,
+      listOfInterpret,
+      "The interpret is invalid. Received this: " + options.interpret
+    );
+    if (options.format) {
+      this._elements.push(
+        "<say-as interpret-as='" +
+          options.interpret +
+          "'" +
+          " format='" +
+          options.format +
+          "'>" +
+          options.word +
+          "</say-as>"
+      );
+      return this;
     }
+    this._elements.push(
+      "<say-as interpret-as='" +
+        options.interpret +
+        "'>" +
+        options.word +
+        "</say-as>"
+    );
+    return this;
+  } else {
+    this._elements.push(options.word);
+    return this;
+  }
 };
 
 /**
@@ -273,13 +450,19 @@ Speech.prototype.sayAs = function (options) {
  * @returns {Speech}
  */
 Speech.prototype.partOfSpeech = function (options) {
-    this._present(options, "The object provided to Speech#partOfSpeech(..) was invalid.");
-    this._present(options.word, "The word provided to Speech#partOfSpeech(..) was null or undefined.");
-    var word = this._escape(options.word);
-    if (options.role) {
-        this._elements.push("<w role=\'" + options.role + "'>" + word + "</w>")
-    }
-    return this;
+  this._present(
+    options,
+    "The object provided to Speech#partOfSpeech(..) was invalid."
+  );
+  this._present(
+    options.word,
+    "The word provided to Speech#partOfSpeech(..) was null or undefined."
+  );
+  var word = this._escape(options.word);
+  if (options.role) {
+    this._elements.push("<w role='" + options.role + "'>" + word + "</w>");
+  }
+  return this;
 };
 
 /**
@@ -292,15 +475,33 @@ Speech.prototype.partOfSpeech = function (options) {
  * @returns {Speech}
  */
 Speech.prototype.phoneme = function (alphabet, ph, word) {
-    this._present(alphabet, "The alphabet provided to Speech#phoneme(..) was null or undefined.");
-    this._present(ph, "The ph provided to Speech#phoneme(..) was null or undefined.");
-    this._present(word, "The word provided to Speech#phoneme(..) was null or undefined.");
-    var escapedWord = this._escape(word);
-    if (ph.indexOf("'") !== -1) {
-        ph = ph.replace(/'/g, '&apos;')
-    }
-    this._elements.push("<phoneme alphabet=\'" + alphabet + "\'" + " ph=\'" + ph + "'>" + escapedWord + "</phoneme>");
-    return this;
+  this._present(
+    alphabet,
+    "The alphabet provided to Speech#phoneme(..) was null or undefined."
+  );
+  this._present(
+    ph,
+    "The ph provided to Speech#phoneme(..) was null or undefined."
+  );
+  this._present(
+    word,
+    "The word provided to Speech#phoneme(..) was null or undefined."
+  );
+  var escapedWord = this._escape(word);
+  if (ph.indexOf("'") !== -1) {
+    ph = ph.replace(/'/g, "&apos;");
+  }
+  this._elements.push(
+    "<phoneme alphabet='" +
+      alphabet +
+      "'" +
+      " ph='" +
+      ph +
+      "'>" +
+      escapedWord +
+      "</phoneme>"
+  );
+  return this;
 };
 
 /**
@@ -310,21 +511,21 @@ Speech.prototype.phoneme = function (alphabet, ph, word) {
  * @private
  */
 Speech.prototype._escape = function (word) {
-    if (typeof (word) === "string") {
-        word = word.replace(/&/g, '&amp;');
-        word = word.replace(/</g, '&lt;');
-        word = word.replace(/>/g, '&gt;');
-        word = word.replace(/"/g, '&quot;');
-        word = word.replace(/'/g, '&apos;');
-        return word;
-    }
-    if (typeof (word) === "number") {
-        return word;
-    }
-    if (typeof (word) === "boolean") {
-        return word;
-    }
-    throw new Error('received invalid type ' + typeof (word));
+  if (typeof word === "string") {
+    word = word.replace(/&/g, "&amp;");
+    word = word.replace(/</g, "&lt;");
+    word = word.replace(/>/g, "&gt;");
+    word = word.replace(/"/g, "&quot;");
+    word = word.replace(/'/g, "&apos;");
+    return word;
+  }
+  if (typeof word === "number") {
+    return word;
+  }
+  if (typeof word === "boolean") {
+    return word;
+  }
+  throw new Error("received invalid type " + typeof word);
 };
 
 /**
@@ -334,10 +535,10 @@ Speech.prototype._escape = function (word) {
  * @private
  */
 Speech.prototype._notEmpty = function (word, msg) {
-    this._present(word, msg);
-    if (word.length === 0) {
-        throw msg;
-    }
+  this._present(word, msg);
+  if (word.length === 0) {
+    throw msg;
+  }
 };
 
 /**
@@ -346,10 +547,10 @@ Speech.prototype._notEmpty = function (word, msg) {
  * @param name the name of the parameter used in the error message.
  */
 Speech.prototype._isFunction = function (fnc, name) {
-    var fncType = typeof (fnc);
-    if (fncType !== "function") {
-        throw new Error(name + " was not a function. received: " + fncType);
-    }
+  var fncType = typeof fnc;
+  if (fncType !== "function") {
+    throw new Error(name + " was not a function. received: " + fncType);
+  }
 };
 
 /**
@@ -360,16 +561,27 @@ Speech.prototype._isFunction = function (fnc, name) {
  * @returns {Speech}
  */
 Speech.prototype.emphasis = function (level, word) {
-    this._present(level, "The level provided to Speech#emphasis(..) was null or undefined");
-    this._present(word, "The word provided to Speech#emphasis(..) was null or undefined");
-    var levels = ['strong', 'moderate', 'reduced'];
-    if (levels.indexOf(level) < 0) {
-        throw new Error("The level provided to Speech#emphasis(..) was not valid. Received level: " + level);
-    }
+  this._present(
+    level,
+    "The level provided to Speech#emphasis(..) was null or undefined"
+  );
+  this._present(
+    word,
+    "The word provided to Speech#emphasis(..) was null or undefined"
+  );
+  var levels = ["strong", "moderate", "reduced"];
+  if (levels.indexOf(level) < 0) {
+    throw new Error(
+      "The level provided to Speech#emphasis(..) was not valid. Received level: " +
+        level
+    );
+  }
 
-    this._notEmpty(word, "The word provided to Speech#emphasis(..) was empty");
-    this._elements.push("<emphasis level='" + level + "'>" + this._escape(word) + "</emphasis>");
-    return this;
+  this._notEmpty(word, "The word provided to Speech#emphasis(..) was empty");
+  this._elements.push(
+    "<emphasis level='" + level + "'>" + this._escape(word) + "</emphasis>"
+  );
+  return this;
 };
 
 /**
@@ -379,49 +591,72 @@ Speech.prototype.emphasis = function (level, word) {
  * @returns {Speech}
  */
 Speech.prototype.prosody = function (attributes, word) {
-    this._present(attributes, "The attributes provided to Speech#prosody(..) was null or undefined");
-    this._present(word, "The word provided to Speech#prosody(..) was null or undefined");
-    this._notEmpty(word, "The word provided to Speech#prosody(..) was empty");
+  this._present(
+    attributes,
+    "The attributes provided to Speech#prosody(..) was null or undefined"
+  );
+  this._present(
+    word,
+    "The word provided to Speech#prosody(..) was null or undefined"
+  );
+  this._notEmpty(word, "The word provided to Speech#prosody(..) was empty");
 
-    var validRates = ['x-slow', 'slow', 'medium', 'fast', 'x-fast'];
-    var validPitches = ['x-low', 'low', 'medium', 'high', 'x-high'];
-    var validVolumes = ['silent', 'x-soft', 'soft', 'medium', 'loud', 'x-loud'];
+  var validRates = ["x-slow", "slow", "medium", "fast", "x-fast"];
+  var validPitches = ["x-low", "low", "medium", "high", "x-high"];
+  var validVolumes = ["silent", "x-soft", "soft", "medium", "loud", "x-loud"];
 
-    var final = "<prosody";
+  var final = "<prosody";
 
-    validateAttribute(attributes, 'rate', validRates, function () {
-        if (!/\d+%/.test(attributes.rate)) {
-            throw new Error("attributes.rate is not a valid rate");
-        }
-        checkRateRange(attributes.rate);
-    }, function () {
-        final += " rate='" + attributes.rate + "'";
-    });
+  validateAttribute(
+    attributes,
+    "rate",
+    validRates,
+    function () {
+      if (!/\d+%/.test(attributes.rate)) {
+        throw new Error("attributes.rate is not a valid rate");
+      }
+      checkRateRange(attributes.rate);
+    },
+    function () {
+      final += " rate='" + attributes.rate + "'";
+    }
+  );
 
-    validateAttribute(attributes, 'pitch', validPitches, function () {
-        if (!/(\+|-)\d+(\.\d+)?%/.test(attributes.pitch)) {
-            throw new Error("attributes.pitch is not a valid pitch");
-        }
-    }, function () {
-        final += " pitch='" + attributes.pitch + "'";
-    });
+  validateAttribute(
+    attributes,
+    "pitch",
+    validPitches,
+    function () {
+      if (!/(\+|-)\d+(\.\d+)?%/.test(attributes.pitch)) {
+        throw new Error("attributes.pitch is not a valid pitch");
+      }
+    },
+    function () {
+      final += " pitch='" + attributes.pitch + "'";
+    }
+  );
 
-    validateAttribute(attributes, 'volume', validVolumes, function () {
-        if (!/(\+|-)\d+(\.\d+)?db/.test(attributes.volume)) {
-            throw new Error("attributes.volume is not a valid volume");
-        }
-        var length = attributes.volume.length;
-        var firstHalf = attributes.volume.substring(0, length - 2);
-        firstHalf += "dB";
-        attributes.volume = firstHalf;
-    }, function () {
-        final += " volume='" + attributes.volume + "'";
-    });
+  validateAttribute(
+    attributes,
+    "volume",
+    validVolumes,
+    function () {
+      if (!/(\+|-)\d+(\.\d+)?db/.test(attributes.volume)) {
+        throw new Error("attributes.volume is not a valid volume");
+      }
+      var length = attributes.volume.length;
+      var firstHalf = attributes.volume.substring(0, length - 2);
+      firstHalf += "dB";
+      attributes.volume = firstHalf;
+    },
+    function () {
+      final += " volume='" + attributes.volume + "'";
+    }
+  );
 
-    final += ">" + this._escape(word) + "</prosody>";
-    this._elements.push(final);
-    return this;
-
+  final += ">" + this._escape(word) + "</prosody>";
+  this._elements.push(final);
+  return this;
 };
 
 /**
@@ -439,13 +674,13 @@ Speech.prototype.prosody = function (attributes, word) {
  * @param onSuccessful A hook to call when all validation checks succeed.
  */
 function validateAttribute(obj, attribute, validList, onCheck, onSuccessful) {
-    if (obj.hasOwnProperty(attribute)) {
-        obj[attribute] = obj[attribute].toLowerCase().trim();
-        if (validList.indexOf(obj[attribute]) == -1) {
-            onCheck();
-        }
-        onSuccessful();
+  if (obj.hasOwnProperty(attribute)) {
+    obj[attribute] = obj[attribute].toLowerCase().trim();
+    if (validList.indexOf(obj[attribute]) == -1) {
+      onCheck();
     }
+    onSuccessful();
+  }
 }
 
 /**
@@ -453,11 +688,13 @@ function validateAttribute(obj, attribute, validList, onCheck, onSuccessful) {
  * @param num is the value of rate
  */
 function checkRateRange(num) {
-    var numString = num.substring(0, num.length - 1);
-    var parseNum = parseInt(numString);
-    if (parseNum < 20) {
-        throw new Error("The minimum rate is twenty percentage. Received: " + parseNum);
-    }
+  var numString = num.substring(0, num.length - 1);
+  var parseNum = parseInt(numString);
+  if (parseNum < 20) {
+    throw new Error(
+      "The minimum rate is twenty percentage. Received: " + parseNum
+    );
+  }
 }
 
 /**
@@ -467,13 +704,21 @@ function checkRateRange(num) {
  * @returns {Speech}
  */
 Speech.prototype.sub = function (alias, word) {
-    this._present(alias, "The alias provided to Speech#sub(..) was null or undefined");
-    this._notEmpty(alias, "The alias provided to Speech#sub(..) was empty");
-    this._present(word, "The word provided to Speech#sub(..) was null or undefined");
-    this._notEmpty(word, "The word provided to Speech#sub(..) was empty");
+  this._present(
+    alias,
+    "The alias provided to Speech#sub(..) was null or undefined"
+  );
+  this._notEmpty(alias, "The alias provided to Speech#sub(..) was empty");
+  this._present(
+    word,
+    "The word provided to Speech#sub(..) was null or undefined"
+  );
+  this._notEmpty(word, "The word provided to Speech#sub(..) was empty");
 
-    this._elements.push("<sub alias='" + alias + "'>" + this._escape(word) + "</sub>");
-    return this;
+  this._elements.push(
+    "<sub alias='" + alias + "'>" + this._escape(word) + "</sub>"
+  );
+  return this;
 };
 
 /**
@@ -483,9 +728,12 @@ Speech.prototype.sub = function (alias, word) {
  * @returns {Speech}
  */
 Speech.prototype.sayWithSSML = function (saying) {
-    this._present(saying, "The saying provided to Speech#sayWithSSML(..) was null or undefined.");
-    this._elements.push(saying);
-    return this;
+  this._present(
+    saying,
+    "The saying provided to Speech#sayWithSSML(..) was null or undefined."
+  );
+  this._elements.push(saying);
+  return this;
 };
 
 /**
@@ -494,9 +742,9 @@ Speech.prototype.sayWithSSML = function (saying) {
  * @returns {Speech}
  */
 Speech.prototype.sayRandomChoice = function (choices) {
-    var choice = this._helper.chooseRandomWord(choices);
-    this._elements.push(this._escape(choice));
-    return this;
+  var choice = this._helper.chooseRandomWord(choices);
+  this._elements.push(this._escape(choice));
+  return this;
 };
 
 /**
@@ -506,17 +754,17 @@ Speech.prototype.sayRandomChoice = function (choices) {
  * @param msg is the error message that will be thrown when the value is not in the list
  */
 function isInList(value, listOfValues, msg) {
-    value = value.toLowerCase().trim();
-    if (listOfValues.indexOf(value) === -1) {
-        throw new Error(msg);
-    }
+  value = value.toLowerCase().trim();
+  if (listOfValues.indexOf(value) === -1) {
+    throw new Error(msg);
+  }
 }
 
 function isInListCS(value, listOfValues, msg) {
-    value = value.trim();
-    if (listOfValues.indexOf(value) === -1) {
-        throw new Error(msg);
-    }
+  value = value.trim();
+  if (listOfValues.indexOf(value) === -1) {
+    throw new Error(msg);
+  }
 }
 
 module.exports = Speech;
